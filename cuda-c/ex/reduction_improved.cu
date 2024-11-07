@@ -5,8 +5,8 @@
 #include <vector>
 #include <assert.h>
 
-#define WIDTH 2048                          // Define the vector width
-#define N_BLOCKS  256                       // Define the number of blocks
+#define WIDTH 4096                          // Define the vector width
+#define N_BLOCKS  8                         // Define the number of blocks
 #define THREADS_PER_BLOCK WIDTH/N_BLOCKS/2  // Define the number of threads in a block
 
 inline cudaError_t checkCuda(cudaError_t result) {
