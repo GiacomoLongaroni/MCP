@@ -39,11 +39,15 @@ __global__ void stencil(const int* V, int* R, const int size, const int radius) 
     if (threadIdx.x < radius) {
         // Load elements that are radius positions to the left
         // of the current element in the global memory vector V
-        tmp[s_idx - radius] = V[g_idx - radius];
+        if (g_idx >= radius) {
+            tmp[s_idx - radius] = V[g_idx - radius];
+        }
         // Load element that is blockDim.x positions to the right 
         // of the current element into shared memory 
         // (also fill up the "right border")
-        tmp[s_idx + blockDim.x] = V[g_idx + blockDim.x];
+        if (g_idx < size - blockDim.x){
+            tmp[s_idx + blockDim.x] = V[g_idx + blockDim.x];
+        }
     }
 
     // Synchronize (ensure all the data is available)
@@ -70,7 +74,8 @@ void print_vector(const int* V, int len) {
         len = WIDTH;
     }
     for (int i = 0; i < len; i++) {
-        printf("%d\t", V[i]);
+        // printf("%d\t", V[i]);
+        printf("%d,", V[i]);
     }
     printf("\n");
 }
@@ -85,7 +90,7 @@ int main(int argc, char** argv) {
     std::generate(V.begin(), V.end(), random_number); // Fill vector 'V' with random numbers
 
     printf("Vector V\n");
-    print_vector(V.data(), 10);
+    print_vector(V.data(), WIDTH);
 
     // Device vectors
     int* d_V;
@@ -111,7 +116,7 @@ int main(int argc, char** argv) {
     );
 
     printf("Vector R\n");
-    print_vector(R.data(), 10);
+    print_vector(R.data(), WIDTH);
 
     // Cleanup by freeing the allocated GPU memory
     cudaFree(d_V);
